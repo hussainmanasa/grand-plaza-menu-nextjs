@@ -102,7 +102,7 @@ export async function renderOgImage({ theme, eyebrow, title, subtitle, footer }:
 /**
  * Every share card on the site. Served by src/app/og/[image]/route.tsx as
  * real .png files (the `opengraph-image` file convention exports files with no
- * extension, which GitHub Pages serves with the wrong content type).
+ * extension, which static hosts may serve with the wrong content type).
  */
 type OgEntry = Card & { id: string; alt: string };
 

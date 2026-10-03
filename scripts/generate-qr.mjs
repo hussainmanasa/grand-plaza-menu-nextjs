@@ -6,14 +6,11 @@
  *   <venue>-<menu>.(svg|png)         -> straight to one menu (bar counter, etc.)
  *   index.html                       -> proof sheet to review/print them all
  *
- * The base URL is taken from, in order:
- *   --url https://example.com/repo   (or SITE_URL env var)
- *   public/CNAME                      (custom domain)
- *   git remote "origin"               (https://<user>.github.io/<repo>)
+ * The codes point at `url` in src/config/site.ts (the live site). To generate
+ * them for a different address, pass --url https://example.com (or SITE_URL).
  *
  * Always scan the printed codes with a couple of phones before a print run.
  */
-import { execFileSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import QRCode from "qrcode";
@@ -26,30 +23,12 @@ const PNG_SIZE = 2048;
 // "Q" survives ~25% damage: smudges, glare, a small logo sticker on top.
 const ERROR_CORRECTION = "Q";
 
-async function resolveBaseUrl() {
+function resolveBaseUrl() {
   const flag = process.argv.indexOf("--url");
-  const explicit = flag > -1 ? process.argv[flag + 1] : process.env.SITE_URL;
-  if (explicit) return explicit;
-
-  const cname = await fs.readFile(path.join(ROOT, "public", "CNAME"), "utf8").catch(() => "");
-  if (cname.trim()) return `https://${cname.trim()}`;
-
-  try {
-    const remote = execFileSync("git", ["remote", "get-url", "origin"], { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
-    const match = remote.match(/github\.com[:/]([^/]+)\/(.+?)(?:\.git)?$/);
-    if (match) {
-      const [, owner, repo] = match;
-      const user = owner.toLowerCase();
-      return repo.toLowerCase() === `${user}.github.io` ? `https://${user}.github.io` : `https://${user}.github.io/${repo}`;
-    }
-  } catch {
-    // no git remote yet
-  }
-  console.error("[qr] Could not work out the site URL. Pass it explicitly:\n     npm run qr -- --url https://<user>.github.io/<repo>");
-  process.exit(1);
+  return (flag > -1 ? process.argv[flag + 1] : process.env.SITE_URL) || site.url;
 }
 
-const base = (await resolveBaseUrl()).replace(/\/$/, "");
+const base = resolveBaseUrl().replace(/\/$/, "");
 if (!/^https:\/\//.test(base)) console.warn(`[qr] warning: ${base} is not https. Printed codes should point at the live site.`);
 
 const targets = [

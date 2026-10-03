@@ -1,13 +1,12 @@
 import type { NextConfig } from "next";
 
-// "/<repo>" on a GitHub project site, "" locally or on a custom domain.
-// Set by .github/workflows/deploy.yml from the GitHub Pages settings.
+// Only needed when hosting under a sub-path (e.g. "/menu"); empty otherwise.
 const basePath = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "");
 
 const nextConfig: NextConfig = {
-  // Emit plain HTML/CSS/JS into out/ for GitHub Pages; there is no server.
+  // Plain HTML/CSS/JS in out/; no server needed (Vercel serves it as a static site).
   output: "export",
-  // /golden-ember/ -> out/golden-ember/index.html, which GitHub Pages serves natively.
+  // /golden-ember/ -> out/golden-ember/index.html, served at /golden-ember/.
   trailingSlash: true,
   basePath,
   // next/image optimisation needs a server; menu images are pre-optimised by scripts/build-menus.mjs.

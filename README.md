@@ -2,7 +2,7 @@
 
 Menu website for **Grand Plaza** and its two venues, **Golden Ember** (fine dining) and **Throttle Up** (premium lounge). Guests scan a QR code, choose a venue and menu, and see the full menu on their phone.
 
-Built with Next.js (App Router, static export) and hosted free on GitHub Pages.
+Built with Next.js (App Router, static export) and hosted on Vercel at **https://grand-plaza-panvel.vercel.app**.
 
 ```
 /                         Grand Plaza: choose a venue / menu
@@ -124,34 +124,18 @@ Other scripts:
 
 1. Sign in at [vercel.com](https://vercel.com) with GitHub, then **Add New… → Project** and import this repository.
 2. Keep the detected settings: Framework **Next.js**, Build Command `npm run build`, Output Directory left as default, Node.js **22.x** (or newer).
-3. No environment variables are needed: the site uses the project's production domain (e.g. `https://<project>.vercel.app`) for canonical links, share images and the sitemap. After adding a custom domain, set `NEXT_PUBLIC_SITE_URL=https://<domain>` under **Settings → Environment Variables** and redeploy.
+3. No environment variables are needed. The live address comes from `url` in `src/config/site.ts`, which is used for canonical links, share images, the sitemap and the QR codes.
 4. **Deploy.** Every push to `master` then redeploys production; other branches get preview URLs.
 
-Then regenerate the QR codes for the new address: `npm run qr -- --url https://<project>.vercel.app` (or your custom domain).
-
-## Deploying to GitHub Pages
-
-1. Create a GitHub repository and push this project to its `master` branch.
-2. In the repo, go to **Settings → Pages → Build and deployment → Source** and choose **GitHub Actions**.
-3. The workflow in `.github/workflows/deploy.yml` builds and publishes on every push to `master` (or run it manually from the **Actions** tab).
-
-The site will be at `https://<user>.github.io/<repo>/`. The workflow reads that sub-path from GitHub, so no config change is needed.
-
-### Custom domain (optional, recommended)
-
-Printed QR codes are permanent, and a custom domain (e.g. `menu.grandplaza.in`) means they keep working even if hosting changes later.
-
-1. Add the domain under **Settings → Pages → Custom domain** and create the DNS record GitHub shows.
-2. Add a file `public/CNAME` containing just the domain name.
-3. Push. The workflow switches to the root path automatically. Then **regenerate the QR codes**.
+**Custom domain:** add it under **Settings → Domains**, then change `url` in `src/config/site.ts` to the new address, push, and run `npm run qr` again. Changing the address changes the QR codes, so reprint them.
 
 ## QR codes
 
 After the site is live:
 
 ```bash
-npm run qr                                            # uses public/CNAME or the git remote
-npm run qr -- --url https://<user>.github.io/<repo>   # or set the URL explicitly
+npm run qr                                       # codes for `url` in src/config/site.ts
+npm run qr -- --url https://another-address.com  # or for a different address
 ```
 
 This writes to `qr/` (not deployed):
@@ -170,7 +154,6 @@ Open `qr/index.html` to review them all. Give the **SVG** files to the printer. 
 - Submit `https://<site>/sitemap.xml` in [Google Search Console](https://search.google.com/search-console). To verify via HTML tag, set `googleSiteVerification` in `src/config/site.ts`.
 - Check structured data with the [Rich Results Test](https://search.google.com/test/rich-results).
 - Replace every placeholder in `src/config/*.ts` (address, phone, hours) with real details. Google compares them with the Google Business Profile.
-- On a `github.io` project site, crawlers only read `robots.txt` from the domain root, which is one more reason to use a custom domain.
 
 ## Project layout
 
@@ -190,5 +173,4 @@ src/
     sitemap.ts, robots.ts, manifest.ts, not-found.tsx
   components/             UI pieces (VenueCard, MenuPages, MenuTabs, …)
   lib/                    URLs, metadata, structured data, theme helpers
-.github/workflows/deploy.yml
 ```

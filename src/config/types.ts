@@ -134,6 +134,12 @@ export type VenueConfig = {
 };
 
 export type SiteConfig = {
+  /**
+   * Live address of the site, without a trailing slash. Used for canonical
+   * links, share images, the sitemap and the QR codes. Changing it changes the
+   * printed QR codes too.
+   */
+  url: string;
   name: string;
   tagline: string;
   description: string;

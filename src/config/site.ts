@@ -2,6 +2,7 @@ import type { SiteConfig } from "./types";
 
 // Grand Plaza has no general phone or email yet; add `telephone` / `email` here to show them in the footer.
 export const site: SiteConfig = {
+  url: "https://grand-plaza-panvel.vercel.app",
   name: "Grand Plaza",
   tagline: "Fine dining & premium sports lounge",
   description:
