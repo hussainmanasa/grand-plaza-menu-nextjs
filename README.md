@@ -61,7 +61,17 @@ Share images (WhatsApp previews, etc.) are generated from the same theme, so the
 
 ### Add a logo
 
-Put the file in `public/brand/` and set `logo: "/brand/golden-ember.svg"` on the venue (or on `site`). Without a logo the name is set as a text wordmark.
+Put the file in `public/brand/` and set `logo` on the venue (or on `site`) with its pixel size:
+
+```ts
+logo: { src: "/brand/golden-ember-logo.png", width: 722, height: 1058 },
+```
+
+The logo appears on the landing-page card and at the top of the venue page, and is included in Google's business data. Without a logo the name is set as a text wordmark. Use a transparent PNG or SVG that reads well on the venue's background colour; around 1000–1500px on the long side is plenty.
+
+### Instagram
+
+Set `instagram: "https://www.instagram.com/<handle>/"` on a venue. It shows as a link in the venue page's "Visit us" section and is added to Google's business data.
 
 ### Hide pages from the on-screen menu
 
@@ -72,6 +82,18 @@ Blank or print-only pages (inside covers, spacer pages) can be left out of the v
 ```
 
 The Download PDF button still gives the complete file. After replacing a PDF, check that the numbers still point at the right pages.
+
+### Link the PDF to Google Drive instead of hosting it
+
+By default, the menu's PDF button downloads a copy published with the site. To point it at a shared file instead (handy for very large PDFs), set `pdfLink` on the menu in `src/config/venues.ts`:
+
+```ts
+{ slug: "drinks", file: "throttle-up-drinks.pdf", pdfLink: "https://drive.google.com/file/d/<FILE_ID>/view?usp=sharing", ... }
+```
+
+- In Drive, set the file to **Share → General access → Anyone with the link (Viewer)**, or guests will see a sign-in page.
+- The button changes to **Open PDF (Google Drive)** and opens in a new tab, and the PDF is no longer published with the site.
+- Keep the PDF in `menus/`, because the on-screen pages are still rendered from it. When the menu changes, update **both** the file in `menus/` and the file in Drive. In Drive, use *Manage versions → Upload new version* so the link stays the same.
 
 ### Add or remove a menu
 
@@ -97,6 +119,15 @@ Other scripts:
 | `npm run menus` | Re-render `menus/*.pdf` (runs automatically before `dev` / `build`) |
 | `npm run menus:placeholder` | Create sample PDFs for any missing menu (`-- --force` to overwrite) |
 | `npm run qr` | Generate QR codes for print (see below) |
+
+## Deploying to Vercel
+
+1. Sign in at [vercel.com](https://vercel.com) with GitHub, then **Add New… → Project** and import this repository.
+2. Keep the detected settings: Framework **Next.js**, Build Command `npm run build`, Output Directory left as default, Node.js **22.x** (or newer).
+3. No environment variables are needed: the site uses the project's production domain (e.g. `https://<project>.vercel.app`) for canonical links, share images and the sitemap. After adding a custom domain, set `NEXT_PUBLIC_SITE_URL=https://<domain>` under **Settings → Environment Variables** and redeploy.
+4. **Deploy.** Every push to `master` then redeploys production; other branches get preview URLs.
+
+Then regenerate the QR codes for the new address: `npm run qr -- --url https://<project>.vercel.app` (or your custom domain).
 
 ## Deploying to GitHub Pages
 

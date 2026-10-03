@@ -1,24 +1,32 @@
 import type { SiteConfig } from "./types";
 
-// TODO(client): street address, PIN code, phone and email below are placeholders (city is from the Golden Ember menu).
+// Grand Plaza has no general phone or email yet; add `telephone` / `email` here to show them in the footer.
 export const site: SiteConfig = {
   name: "Grand Plaza",
-  tagline: "Fine dining & premium lounge",
+  tagline: "Fine dining & premium sports lounge",
   description:
-    "Grand Plaza is home to Golden Ember, a fine-dining restaurant, and Throttle Up, a premium lounge. Browse the latest menus for both.",
+    "Grand Plaza is home to Golden Ember, a fine-dining restaurant, and Throttle Up, a premium sports lounge. Browse the latest menus for both.",
   language: "en",
   locale: "en_IN",
   address: {
-    streetAddress: "123 Placeholder Avenue",
+    // "Grand Plaza" itself is left out: pages already show the name above the address.
+    streetAddress: "Takka Rd, near Municipal Water Tank, Sector 21",
     addressLocality: "Panvel",
     addressRegion: "Maharashtra",
-    postalCode: "000000",
+    postalCode: "410206",
     addressCountry: "IN",
   },
-  telephone: "+91 00000 00000",
-  email: "hello@example.com",
   social: [],
-  keywords: ["Grand Plaza", "Grand Plaza Panvel", "fine dining Panvel", "lounge Panvel", "restaurant menu", "bar menu"],
+  // Gold (#c8a868) on transparent; matches the site accent below.
+  logo: { src: "/brand/grand-plaza-logo.png", width: 1600, height: 496 },
+  keywords: [
+    "Grand Plaza",
+    "Grand Plaza Panvel",
+    "fine dining Panvel",
+    "lounge Panvel",
+    "restaurant menu",
+    "bar menu",
+  ],
   theme: {
     displayFont: "serif",
     colors: {

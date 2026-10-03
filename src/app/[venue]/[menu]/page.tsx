@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeftIcon, ArrowRightIcon, DownloadIcon } from "@/components/icons";
+import { ArrowLeftIcon, ArrowRightIcon, DownloadIcon, ExternalLinkIcon } from "@/components/icons";
 import { JsonLd } from "@/components/JsonLd";
 import { MenuPages } from "@/components/MenuPages";
 import { MenuTabs } from "@/components/MenuTabs";
@@ -10,14 +10,23 @@ import { site } from "@/config/site";
 import { venues } from "@/config/venues";
 import { pageMetadata } from "@/lib/metadata";
 import { breadcrumbLd, menuLd } from "@/lib/structured-data";
-import { absoluteUrl, menuPath, venuePath, withBasePath } from "@/lib/url";
-import { formatBytes, getMenu, getMenuAsset, getVenue, getVisiblePages, menuName } from "@/lib/venues";
+import { menuPath, venuePath } from "@/lib/url";
+import { formatBytes, getMenu, getPdfTarget, getVenue, getVisiblePages, menuName, type PdfTarget } from "@/lib/venues";
 
 export const dynamicParams = false;
 
 export function generateStaticParams() {
   return venues.flatMap((v) => v.menus.map((m) => ({ venue: v.slug, menu: m.slug })));
 }
+
+/** Link attributes for the PDF buttons: download the hosted copy, or open `pdfLink` in a new tab. */
+function pdfLinkProps(pdf: PdfTarget, downloadName: string) {
+  return pdf.kind === "link"
+    ? { href: pdf.href, target: "_blank", rel: "noopener noreferrer" }
+    : { href: pdf.href, download: downloadName };
+}
+
+const hostLabel = (host: string) => (host === "drive.google.com" ? "Google Drive" : host.replace(/^www\./, ""));
 
 async function resolve(params: PageProps<"/[venue]/[menu]">["params"]) {
   const { venue: venueSlug, menu: menuSlug } = await params;
@@ -49,10 +58,9 @@ export default async function MenuPage({ params }: PageProps<"/[venue]/[menu]">)
   if (!found) notFound();
   const { venue, menu } = found;
 
-  const asset = getMenuAsset(menu);
   const pages = getVisiblePages(menu);
-  const pdfHref = withBasePath(asset.pdf.src);
-  const downloadName = `${venue.name} - ${menu.title}.pdf`;
+  const pdf = getPdfTarget(menu);
+  const pdfProps = pdfLinkProps(pdf, `${venue.name} - ${menu.title}.pdf`);
   const others = venue.menus.filter((m) => m.slug !== menu.slug);
   const hasText = pages.some((p) => p.text);
 
@@ -76,19 +84,22 @@ export default async function MenuPage({ params }: PageProps<"/[venue]/[menu]">)
           </Link>
           <MenuTabs venue={venue} current={menu.slug} />
           <a
-            href={pdfHref}
-            download={downloadName}
-            aria-label={`Download ${menu.title} PDF`}
+            {...pdfProps}
+            aria-label={
+              pdf.kind === "link"
+                ? `Open ${menu.title} PDF on ${hostLabel(pdf.host)} (opens in a new tab)`
+                : `Download ${menu.title} PDF`
+            }
             className="grid size-10 shrink-0 place-items-center rounded-full text-muted hover:bg-surface hover:text-foreground"
           >
-            <DownloadIcon />
+            {pdf.kind === "link" ? <ExternalLinkIcon /> : <DownloadIcon />}
           </a>
         </div>
       </header>
 
       <main id="menu" className="mx-auto max-w-3xl px-3 pb-24 pt-6 sm:px-4 sm:pt-8">
         <h1 className="mb-6 text-center">
-          <span className="block text-xs font-medium uppercase tracking-[0.3em] text-accent">{venue.name}</span>
+          <span className="block text-xs font-medium uppercase tracking-[0.3em] text-accent-text">{venue.name}</span>
           <span className="mt-2 block font-display text-3xl font-semibold sm:text-4xl">{menu.title}</span>
         </h1>
 
@@ -96,12 +107,21 @@ export default async function MenuPage({ params }: PageProps<"/[venue]/[menu]">)
 
         <div data-menu-end className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center">
           <a
-            href={pdfHref}
-            download={downloadName}
+            {...pdfProps}
             className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-accent px-6 text-sm font-semibold text-accent-foreground hover:bg-accent/85"
           >
-            <DownloadIcon width={18} height={18} /> Download PDF
-            <span className="font-normal opacity-75">({formatBytes(asset.pdf.bytes)})</span>
+            {pdf.kind === "link" ? (
+              <>
+                <ExternalLinkIcon width={18} height={18} /> Open PDF
+                <span className="font-normal opacity-75">({hostLabel(pdf.host)})</span>
+                <span className="sr-only">(opens in a new tab)</span>
+              </>
+            ) : (
+              <>
+                <DownloadIcon width={18} height={18} /> Download PDF
+                <span className="font-normal opacity-75">({formatBytes(pdf.bytes)})</span>
+              </>
+            )}
           </a>
           {others.map((other) => (
             <Link
@@ -116,15 +136,15 @@ export default async function MenuPage({ params }: PageProps<"/[venue]/[menu]">)
 
         {hasText && (
           <details className="group mt-10 rounded-2xl border border-border bg-surface/60 p-5 text-sm">
-            <summary className="cursor-pointer select-none font-semibold text-foreground marker:text-accent">
+            <summary className="cursor-pointer select-none font-semibold text-foreground marker:text-accent-text">
               Text version of this menu
             </summary>
             <div className="mt-4 space-y-6">
-              {pages.map(({ pdfPage, text }, i) =>
+              {pages.map(({ pdfPage, part, text }, i) =>
                 text ? (
-                  <section key={pdfPage} aria-label={`Page ${i + 1}`}>
+                  <section key={`${pdfPage}-${part ?? 0}`} aria-label={`Page ${i + 1}`}>
                     {pages.length > 1 && (
-                      <h2 className="mb-2 text-xs font-medium uppercase tracking-[0.25em] text-accent">Page {i + 1}</h2>
+                      <h2 className="mb-2 text-xs font-medium uppercase tracking-[0.25em] text-accent-text">Page {i + 1}</h2>
                     )}
                     <p className="whitespace-pre-line leading-relaxed text-muted">{text}</p>
                   </section>
@@ -139,7 +159,7 @@ export default async function MenuPage({ params }: PageProps<"/[venue]/[menu]">)
 
       <JsonLd
         data={[
-          menuLd(venue, menu, absoluteUrl(asset.pdf.src)),
+          menuLd(venue, menu, pdf.absolute),
           breadcrumbLd([
             { name: site.name, path: "/" },
             { name: venue.name, path: venuePath(venue.slug) },

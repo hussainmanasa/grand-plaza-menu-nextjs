@@ -18,7 +18,13 @@ export default function Home() {
         <header className="px-6 pb-12 pt-16 text-center sm:pb-16 sm:pt-24">
           <p className="text-xs font-medium uppercase tracking-[0.35em] text-muted">Welcome to</p>
           <h1 className="mt-4 text-5xl leading-none sm:text-7xl">
-            <Wordmark name={site.name} logo={site.logo} theme={site.theme} />
+            <Wordmark
+              name={site.name}
+              logo={site.logo}
+              theme={site.theme}
+              className="mx-auto"
+              logoClassName="w-[min(100%,20rem)] sm:w-[26rem]"
+            />
           </h1>
           <p className="mt-4 text-base text-muted sm:text-lg">{site.tagline}</p>
           <Ornament className="mt-8" />

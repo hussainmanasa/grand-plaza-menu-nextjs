@@ -7,7 +7,7 @@ import { site } from "@/config/site";
 import type { MenuConfig, PostalAddress, VenueConfig } from "@/config/types";
 import { ogImagePath } from "@/lib/og";
 import { absoluteUrl, menuPath, venuePath } from "@/lib/url";
-import { venueAddress } from "@/lib/venues";
+import { mapLinks, venueAddress } from "@/lib/venues";
 
 const ORG_ID = absoluteUrl("/#organization");
 const venueId = (v: VenueConfig) => absoluteUrl(`${venuePath(v.slug)}#venue`);
@@ -21,9 +21,10 @@ export function organizationLd() {
     "@id": ORG_ID,
     name: site.name,
     url: absoluteUrl("/"),
+    ...(site.logo ? { logo: absoluteUrl(site.logo.src) } : {}),
     description: site.description,
-    telephone: site.telephone,
-    email: site.email,
+    ...(site.telephone ? { telephone: site.telephone } : {}),
+    ...(site.email ? { email: site.email } : {}),
     address: postalAddress(site.address),
     ...(site.social.length ? { sameAs: site.social } : {}),
   };
@@ -38,6 +39,8 @@ export function venueLd(venue: VenueConfig) {
     description: venue.description,
     url: absoluteUrl(venuePath(venue.slug)),
     image: absoluteUrl(ogImagePath(venue.slug)),
+    ...(venue.logo ? { logo: absoluteUrl(venue.logo.src) } : {}),
+    ...(venue.instagram ? { sameAs: [venue.instagram] } : {}),
     telephone: venue.telephone,
     ...(venue.email ? { email: venue.email } : {}),
     priceRange: venue.priceRange,
@@ -49,6 +52,7 @@ export function venueLd(venue: VenueConfig) {
       opens: h.opens,
       closes: h.closes,
     })),
+    hasMap: mapLinks(venue).view,
     hasMenu: venue.menus.map((m) => ({
       "@type": "Menu",
       name: `${venue.name} ${m.title}`,

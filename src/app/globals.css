@@ -12,6 +12,8 @@
   --color-muted: var(--muted);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  /* Small text and icons; may be a lighter shade of the accent for contrast. */
+  --color-accent-text: var(--accent-text);
   --color-border: var(--border);
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--display), var(--font-serif), Georgia, serif;

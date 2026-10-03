@@ -19,9 +19,9 @@ export const metadata: Metadata = {
     template: `%s | ${site.name}`,
   },
   applicationName: site.name,
-  // Listed explicitly: setting `icons` at all disables the automatic app/icon.svg link.
+  // Made from the "GP" symbol of the Grand Plaza logo (public/icon.png, public/touch-icon.png).
   icons: {
-    icon: [{ url: withBasePath("/icon.svg"), type: "image/svg+xml" }],
+    icon: [{ url: withBasePath("/icon.png"), type: "image/png", sizes: "512x512" }],
     apple: withBasePath("/touch-icon.png"),
   },
   robots: { index: true, follow: true },

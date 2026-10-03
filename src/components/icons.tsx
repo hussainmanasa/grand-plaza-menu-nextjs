@@ -33,6 +33,26 @@ export const DownloadIcon = (p: IconProps) => (
   </svg>
 );
 
+export const ExternalLinkIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+  </svg>
+);
+
+export const InstagramIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <rect x="3" y="3" width="18" height="18" rx="5" />
+    <circle cx="12" cy="12" r="4" />
+    <circle cx="17.5" cy="6.5" r="0.75" fill="currentColor" stroke="none" />
+  </svg>
+);
+
+export const DirectionsIcon = (p: IconProps) => (
+  <svg {...base} {...p}>
+    <path d="M3 11l18-8-8 18-2-8-8-2Z" />
+  </svg>
+);
+
 export const ClockIcon = (p: IconProps) => (
   <svg {...base} {...p}>
     <circle cx="12" cy="12" r="9" />

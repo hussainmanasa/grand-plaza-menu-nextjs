@@ -20,6 +20,11 @@ export type ThemeColors = {
   accent: string;
   /** Text drawn on top of `accent`. */
   accentForeground: string;
+  /**
+   * Optional accent for small text and icons on the background, when `accent`
+   * is too dark to read at small sizes. Defaults to `accent`.
+   */
+  accentText?: string;
   /** Hairlines and card outlines. */
   border: string;
 };
@@ -61,6 +66,14 @@ export type PostalAddress = {
   addressCountry: string;
 };
 
+/** A logo image in `public/`. Width and height are its pixel size, used to reserve space while it loads. */
+export type Logo = {
+  /** e.g. "/brand/golden-ember-logo.png" */
+  src: string;
+  width: number;
+  height: number;
+};
+
 export type MenuConfig = {
   /** URL segment: /<venue>/<slug>/ */
   slug: string;
@@ -77,6 +90,19 @@ export type MenuConfig = {
    * pages that exist only for print layout. The downloadable PDF is unchanged.
    */
   hiddenPages?: number[];
+  /**
+   * Wide pages to cut into columns for phones, as { pdfPage: columnCount },
+   * e.g. { 1: 2, 2: 3 } for landscape spreads. Cuts are placed in the blank
+   * gutters between columns. The downloadable PDF is unchanged.
+   */
+  splitPages?: Record<number, number>;
+  /**
+   * Optional shared link to the PDF (e.g. Google Drive, shared as "Anyone with
+   * the link"). When set, the PDF buttons open this link in a new tab and the
+   * PDF itself is not published with the site. The PDF must still be in menus/,
+   * because the on-screen pages are rendered from it.
+   */
+  pdfLink?: string;
 };
 
 export type VenueConfig = {
@@ -97,8 +123,11 @@ export type VenueConfig = {
   /** Falls back to the Grand Plaza address when omitted. */
   address?: PostalAddress;
   openingHours: OpeningHours[];
-  /** Optional logo in `public/`, e.g. "/brand/golden-ember.svg". Text wordmark is used when omitted. */
-  logo?: string;
+  /** Optional logo, shown on the landing card and venue page. Text wordmark is used when omitted. */
+  logo?: Logo;
+  /** Full Instagram profile URL, e.g. "https://www.instagram.com/goldenemberrestaurant/". */
+  instagram?: string;
+  map?: { lat: number; lng: number } | { query: string };
   keywords: string[];
   theme: Theme;
   menus: MenuConfig[];
@@ -113,12 +142,14 @@ export type SiteConfig = {
   /** Open Graph locale, e.g. "en_IN". */
   locale: string;
   address: PostalAddress;
-  telephone: string;
-  email: string;
+  /** Optional; hidden from the footer and structured data when omitted. */
+  telephone?: string;
+  /** Optional; hidden from the footer and structured data when omitted. */
+  email?: string;
   /** Full profile URLs; used for schema.org `sameAs`. */
   social: string[];
-  /** Optional logo in `public/`. Text wordmark is used when omitted. */
-  logo?: string;
+  /** Optional logo. Text wordmark is used when omitted. */
+  logo?: Logo;
   keywords: string[];
   /** Google Search Console "HTML tag" verification token (content value only). */
   googleSiteVerification?: string;

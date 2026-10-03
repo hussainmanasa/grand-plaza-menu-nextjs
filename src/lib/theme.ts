@@ -27,6 +27,7 @@ export function themeStyle(theme: Theme): CSSProperties {
     "--muted": c.muted,
     "--accent": c.accent,
     "--accent-foreground": c.accentForeground,
+    "--accent-text": c.accentText ?? c.accent,
     "--border": c.border,
     "--display": DISPLAY_FONTS[theme.displayFont],
   } as CSSProperties;

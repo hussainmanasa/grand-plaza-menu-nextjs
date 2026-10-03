@@ -1,8 +1,8 @@
-import type { VisiblePage } from "@/lib/venues";
+import type { MenuPageImage } from "@/lib/venues";
 import { withBasePath } from "@/lib/url";
 
 type Props = {
-  pages: VisiblePage[];
+  pages: MenuPageImage[];
   /** e.g. "Golden Ember Food Menu"; becomes "…, page 1 of 2" alt text. */
   label: string;
 };
@@ -15,12 +15,12 @@ type Props = {
 export function MenuPages({ pages, label }: Props) {
   return (
     <ol className="flex flex-col gap-4 sm:gap-6">
-      {pages.map(({ pdfPage, image }, i) => {
+      {pages.map((image, i) => {
         const srcSet = image.sources.map((s) => `${withBasePath(s.src)} ${s.width}w`).join(", ");
         const fallback = image.sources[Math.min(1, image.sources.length - 1)];
         const first = i === 0;
         return (
-          <li key={pdfPage} data-menu-page={i + 1}>
+          <li key={`${image.pdfPage}-${image.part ?? 0}`} data-menu-page={i + 1}>
             {/* eslint-disable-next-line @next/next/no-img-element -- see component comment */}
             <img
               src={withBasePath(fallback.src)}

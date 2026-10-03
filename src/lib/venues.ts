@@ -2,11 +2,18 @@ import { site } from "@/config/site";
 import type { MenuConfig, VenueConfig } from "@/config/types";
 import { venues } from "@/config/venues";
 import manifest from "@/generated/menus.json";
+import { absoluteUrl, withBasePath } from "@/lib/url";
 
+/** One image shown on the site: a whole PDF page, or one column of a split page. */
 export type MenuPageImage = {
+  /** Page number in the original PDF (1-based). */
+  pdfPage: number;
+  /** Column number (1-based) when the page was split via `splitPages`. */
+  part?: number;
   width: number;
   height: number;
   sources: { src: string; width: number }[];
+  text: string;
 };
 
 /** Rendered PDF, produced by scripts/build-menus.mjs. */
@@ -14,9 +21,9 @@ export type MenuAsset = {
   file: string;
   hash: string;
   pageCount: number;
-  pdf: { src: string; bytes: number };
+  /** `src` is null when the menu uses `pdfLink`, so the PDF isn't published with the site. */
+  pdf: { src: string | null; bytes: number };
   pages: MenuPageImage[];
-  text: string[];
 };
 
 const assets = manifest as Record<string, MenuAsset>;
@@ -31,25 +38,37 @@ export function getMenuAsset(menu: MenuConfig): MenuAsset {
   return asset;
 }
 
-/** A PDF page as shown on the site, after `hiddenPages` is applied. */
-export type VisiblePage = {
-  /** Page number in the original PDF (1-based). */
-  pdfPage: number;
-  image: MenuPageImage;
-  text: string;
-};
-
-export function getVisiblePages(menu: MenuConfig): VisiblePage[] {
+/** The images shown on the site for a menu, after `hiddenPages` is applied. */
+export function getVisiblePages(menu: MenuConfig): MenuPageImage[] {
   const asset = getMenuAsset(menu);
   const hidden = new Set(menu.hiddenPages ?? []);
-  for (const n of hidden) {
-    if (n < 1 || n > asset.pageCount) {
-      throw new Error(`hiddenPages for "${menu.file}" lists page ${n}, but the PDF has ${asset.pageCount} pages.`);
+  for (const n of [...hidden, ...Object.keys(menu.splitPages ?? {}).map(Number)]) {
+    if (!Number.isInteger(n) || n < 1 || n > asset.pageCount) {
+      throw new Error(`"${menu.file}" config refers to page ${n}, but the PDF has ${asset.pageCount} pages.`);
     }
   }
-  return asset.pages
-    .map((image, i) => ({ pdfPage: i + 1, image, text: asset.text[i] ?? "" }))
-    .filter((page) => !hidden.has(page.pdfPage));
+  return asset.pages.filter((page) => !hidden.has(page.pdfPage));
+}
+
+/** Where the menu's PDF buttons point: the configured `pdfLink`, or the copy published with the site. */
+export type PdfTarget =
+  | { kind: "link"; href: string; absolute: string; host: string }
+  | { kind: "download"; href: string; absolute: string; bytes: number };
+
+export function getPdfTarget(menu: MenuConfig): PdfTarget {
+  if (menu.pdfLink) {
+    let url: URL;
+    try {
+      url = new URL(menu.pdfLink);
+    } catch {
+      throw new Error(`pdfLink for "${menu.file}" is not a valid URL: ${menu.pdfLink}`);
+    }
+    if (url.protocol !== "https:") throw new Error(`pdfLink for "${menu.file}" must start with https://`);
+    return { kind: "link", href: url.href, absolute: url.href, host: url.hostname };
+  }
+  const { pdf } = getMenuAsset(menu);
+  if (!pdf.src) throw new Error(`"${menu.file}" has no published PDF; run \`npm run menus\` again.`);
+  return { kind: "download", href: withBasePath(pdf.src), absolute: absoluteUrl(pdf.src), bytes: pdf.bytes };
 }
 
 export function getVenue(slug: string): VenueConfig | undefined {
@@ -64,6 +83,26 @@ export function getMenu(venue: VenueConfig, slug: string): MenuConfig | undefine
 export function menuName(venue: VenueConfig, menu: MenuConfig) {
   const name = `${venue.name} ${menu.title}`;
   return /\bmenu$/i.test(menu.title) ? name : `${name} menu`;
+}
+
+/** "https://www.instagram.com/goldenemberrestaurant/" -> "@goldenemberrestaurant" */
+export function instagramHandle(url: string) {
+  const handle = new URL(url).pathname.split("/").filter(Boolean)[0];
+  return handle ? `@${handle}` : url;
+}
+
+/** Google Maps URLs for a venue: an embeddable map, a directions link and a plain "view" link. */
+export function mapLinks(venue: VenueConfig) {
+  const target =
+    venue.map && "lat" in venue.map
+      ? `${venue.map.lat},${venue.map.lng}`
+      : (venue.map?.query ?? `${venue.name}, ${formatAddress(venue)}`);
+  const q = encodeURIComponent(target);
+  return {
+    embed: `https://maps.google.com/maps?q=${q}&z=17&output=embed`,
+    directions: `https://www.google.com/maps/dir/?api=1&destination=${q}`,
+    view: `https://www.google.com/maps/search/?api=1&query=${q}`,
+  };
 }
 
 export const venueAddress = (venue: VenueConfig) => venue.address ?? site.address;
