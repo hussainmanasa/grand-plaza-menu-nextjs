@@ -60,7 +60,7 @@ export const venues: VenueConfig[] = [
         label: "Food",
         title: "Food Menu",
         description:
-          "Indian, Continental and Pan-Asian: soups, tandoor starters, curries, breads, biryani, pizza, pasta, dim sum and desserts.",
+          "Indian, Continental and Pan-Asian: soups, tandoor starters, curries, breads, biryani, pizza, pasta, ramen, sizzlers, dim sum and desserts.",
         file: "golden-ember-food.pdf",
       },
       {
