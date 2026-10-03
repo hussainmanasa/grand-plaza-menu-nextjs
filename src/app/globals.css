@@ -25,8 +25,14 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* The page background also colours the phone's notch / status-bar area and
+   overscroll; venue pages override it in src/app/[venue]/layout.tsx. */
+html,
 body {
-  background: var(--background);
+  background-color: var(--background);
+}
+
+body {
   color: var(--foreground);
 }
 

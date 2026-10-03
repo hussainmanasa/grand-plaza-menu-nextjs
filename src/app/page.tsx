@@ -11,9 +11,10 @@ export default function Home() {
   return (
     <>
       <main className="relative isolate overflow-hidden">
+        {/* Glow behind the logo; it fades out before the top edge so the phone's status-bar area blends in. */}
         <div
           aria-hidden
-          className="absolute inset-x-0 top-0 -z-10 h-[32rem] bg-[radial-gradient(ellipse_at_top,color-mix(in_oklab,var(--accent)_16%,transparent),transparent_65%)]"
+          className="absolute inset-x-0 top-0 -z-10 h-[32rem] bg-[radial-gradient(ellipse_at_50%_55%,color-mix(in_oklab,var(--accent)_16%,transparent),transparent_60%)] [mask-image:linear-gradient(to_bottom,transparent,black_7rem)]"
         />
         <header className="px-6 pb-12 pt-16 text-center sm:pb-16 sm:pt-24">
           <p className="text-xs font-medium uppercase tracking-[0.35em] text-muted">Welcome to</p>
